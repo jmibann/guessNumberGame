@@ -1,20 +1,56 @@
-import React from 'react';
-import { StyleSheet, View, Text, Button, Image } from 'react-native'
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, Image, Dimensions, ScrollView } from 'react-native'
 
 import BodyText from '../components/BodyText';
 import TitleText from '../components/TitleText';
+import Colors from '../constants/colors';
+
+import MainButton from '../components/MainButton.android';
 
 const GameOverScreen = ({ numberOfRounds, userNumber, onRestart }) => {
+
+  const [availableDeviceWidth, setAvailableDeviceWidth] = useState(Dimensions.get('window').width);
+  const [availableDeviceHeight, setAvailableDeviceHeigth] = useState(Dimensions.get('window').height);
+
+  useEffect(() => {
+    const updateLayout = () => {
+      setAvailableDeviceWidth(Dimensions.get('window').width);
+      setAvailableDeviceHeigth(Dimensions.get('window').height);
+    }
+
+    Dimensions.addEventListener('change', updateLayout);
+
+    return () => {
+      Dimensions.removeEventListener('change', updateLayout)
+    }
+
+  })
+
   return (
-    <View style={styles.screen}>
-      <TitleText>The game is over</TitleText>
-      <View style={styles.imageContainer}>
-        <Image style={styles.image} resizeMode='cover' source={require('../assets/success.png')} />
+
+    <ScrollView>
+      <View style={styles.screen}>
+        <TitleText>The game is over</TitleText>
+        <View style={{
+          ...styles.imageContainer, ...{
+            width: availableDeviceWidth * 0.7,
+            height: availableDeviceWidth * 0.7,
+            borderRadius: (availableDeviceWidth * 0.7) / 2,
+            marginVertical: availableDeviceHeight / 30
+          }
+        }
+        }>
+          <Image style={styles.image} resizeMode='cover' source={require('../assets/success.png')} />
+        </View>
+        <View style={styles.textResultContainer}>
+          <BodyText style={styles.resultText}>Your phone needed <Text style={styles.highlight}>{numberOfRounds} </Text>
+            rounds to guess the number <Text style={styles.highlight}>{userNumber}</Text></BodyText>
+        </View>
+
+        <MainButton onPress={onRestart}>NEW GAME</MainButton>
       </View>
-      <BodyText>Number of rounds: {numberOfRounds}</BodyText>
-      <BodyText>Number chosen was: {userNumber}</BodyText>
-      <Button title='NEW GAME' onPress={onRestart} />
-    </View>
+    </ScrollView >
+
   )
 }
 
@@ -22,20 +58,30 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginVertical: 20,
   },
   imageContainer: {
-    width: 300,
-    height: 300,
-    borderRadius: 150,
     borderWidth: 3,
     borderColor: 'black',
     overflow: 'hidden',
-    marginVertical: 30
   },
   image: {
     width: '100%',
     height: '100%',
+  },
+  textResultContainer: {
+    width: '80%'
+  },
+  resultText: {
+    textAlign: 'center',
+    marginVertical: Dimensions.get('window').height / 60,
+    fontSize: Dimensions.get('window').height < 600 ? 16 : 20
+  }
+  ,
+  highlight: {
+    color: Colors.primary,
+    fontFamily: 'open-sans-bold',
   }
 })
 
